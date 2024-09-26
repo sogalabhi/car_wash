@@ -1,99 +1,117 @@
+import 'package:car_wash/pages/home.dart';
+import 'package:car_wash/pages/register.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:car_wash/widgets/allwidgets.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _passwordTextController = TextEditingController();
+  final TextEditingController _emailTextController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("GeeksforGeeks"),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 110.0),
-              child: Center(
-                child: SizedBox(
-                    width: 200,
-                    height: 100,
-                    /*decoration: BoxDecoration( 
-                        color: Colors.red, 
-                        borderRadius: BorderRadius.circular(50.0)),*/
-                    child: Image.asset('assets/images/Instagram.png')),
-              ),
-            ),
-            const Padding(
-              //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: TextField(
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Phone number, email or username',
-                    hintText: 'Enter valid email id as abc@gmail.com'),
-              ),
-            ),
-            const Padding(
-              padding:
-                  EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 0),
-              //padding: EdgeInsets.symmetric(horizontal: 15),
-              child: TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter secure password'),
-              ),
-            ),
-            SizedBox(
-              height: 65,
-              width: 360,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: ElevatedButton(
-                  child: const Text(
-                    'Log in ',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
-                  onPressed: () {
-                    print('Successfully log in ');
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 50,
-            ),
-            Center(
-              child: Row(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(left: 62),
-                    child: Text('Forgot your login details? '),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 1.0),
-                    child: InkWell(
-                        onTap: () {
-                          print('hello');
-                        },
-                        child: const Text(
-                          'Get help logging in.',
-                          style: TextStyle(fontSize: 14, color: Colors.blue),
-                        )),
-                  )
-                ],
-              ),
-            )
-          ],
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: const BoxDecoration(
+          color: Color.fromARGB(255, 52, 1, 141),
         ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+                20, MediaQuery.of(context).size.height * 0.2, 20, 0),
+            child: Column(
+              children: <Widget>[
+                const Text("Login"),
+                const SizedBox(
+                  height: 30,
+                ),
+                reusableTextField("Enter UserName", Icons.person_outline, false,
+                    _emailTextController),
+                const SizedBox(
+                  height: 20,
+                ),
+                reusableTextField("Enter Password", Icons.lock_outline, true,
+                    _passwordTextController),
+                const SizedBox(
+                  height: 5,
+                ),
+                forgetPassword(context),
+                firebaseUIButton(context, "Sign In", () {
+                  FirebaseAuth.instance
+                      .signInWithEmailAndPassword(
+                          email: _emailTextController.text,
+                          password: _passwordTextController.text)
+                      .then((value) {
+                    if (_emailTextController.text == "admin@gmail.com") {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomeScreen()));
+                    } else {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomeScreen()));
+                    }
+                  }).onError((error, stackTrace) {
+                    
+                    String e = "Error ${error.toString()}";
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(e),
+                    ));
+                    print("Error ${error.toString()}");
+                  });
+                }),
+                signUpOption()
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Row signUpOption() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("Don't have account?",
+            style: TextStyle(color: Colors.white70)),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const SignUpScreen()));
+          },
+          child: const Text(
+            " Sign Up",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget forgetPassword(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 35,
+      alignment: Alignment.bottomRight,
+      child: TextButton(
+        child: const Text(
+          "Forgot Password?",
+          style: TextStyle(color: Colors.white70),
+          textAlign: TextAlign.right,
+        ),
+        onPressed: () => {},
       ),
     );
   }
